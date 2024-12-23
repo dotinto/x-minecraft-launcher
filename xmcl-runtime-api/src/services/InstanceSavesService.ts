@@ -175,22 +175,9 @@ export interface InstanceSavesService {
 
 export const InstanceSavesServiceKey: ServiceKey<InstanceSavesService> = 'InstanceSavesService'
 
-export type InstanceSaveExceptions = {
-  /**
-   * - instanceDeleteNoSave -> no save match name provided
-   */
-  type: 'instanceDeleteNoSave'
-  /**
-    * The save name
-    */
-  name: string
-} | {
+export type ImportSaveExceptions = {
   type: 'instanceImportIllegalSave'
   path: string
-} | {
-  type: 'instanceCopySaveNotFound' | 'instanceCopySaveUnexpected'
-  src: string
-  dest: string[]
-} | InstanceNotFoundException
+}
 
-export class InstanceSaveException extends Exception<InstanceSaveExceptions> { }
+export class ImportSaveException extends Exception<ImportSaveExceptions> { }

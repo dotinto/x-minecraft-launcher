@@ -431,6 +431,7 @@ instance:
   versionHint: The Minecraft version of this game
   vmOptions: JVM Options
   vmOptionsHint: Extra arguments to pass to the JVM
+  vmVar: Environment Variables
 instanceAge:
   older: Older
   threeDay: In Three Days

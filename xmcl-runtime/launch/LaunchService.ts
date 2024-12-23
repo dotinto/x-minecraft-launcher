@@ -1,5 +1,5 @@
 import { MinecraftFolder, LaunchOption as ResolvedLaunchOptions, ResolvedVersion, ServerOptions, createMinecraftProcessWatcher, generateArguments, generateArgumentsServer, launch, launchServer } from '@xmcl/core'
-import { AUTHORITY_DEV, GameProcess, LaunchService as ILaunchService, LaunchException, LaunchOptions, LaunchServiceKey, ReportOperationPayload, ResolvedServerVersion } from '@xmcl/runtime-api'
+import { AUTHORITY_DEV, GameProcess, LaunchService as ILaunchService, LaunchException, LaunchExceptionType, LaunchOptions, LaunchServiceKey, ReportOperationPayload, ResolvedServerVersion } from '@xmcl/runtime-api'
 import { offline } from '@xmcl/user'
 import { ChildProcess } from 'child_process'
 import { randomUUID } from 'crypto'
@@ -99,6 +99,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
       extraExecOption: {
         detached: true,
         cwd: minecraftFolder.getPath('server'),
+        env: options.env,
       },
 
       extraJVMArgs: jvmArgs,
@@ -147,6 +148,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
       extraExecOption: {
         detached: true,
         cwd: minecraftFolder.root,
+        env: options.env,
       },
       extraJVMArgs: options.vmOptions?.filter(v => !!v),
       extraMCArgs: options.mcOptions?.filter(v => !!v),
@@ -219,7 +221,8 @@ export class LaunchService extends AbstractService implements ILaunchService {
 
         if (!version) {
           throw new LaunchException({
-            type: 'launchNoVersionInstalled',
+            // type: 'launchNoVersionInstalled',
+            type: LaunchExceptionType.NoVersionInstalled,
             options,
           })
         }
@@ -243,7 +246,17 @@ export class LaunchService extends AbstractService implements ILaunchService {
       if (e instanceof LaunchException) {
         throw e
       }
-      throw new LaunchException({ type: 'launchGeneralException', error: { ...(e as any), message: (e as any).message, stack: (e as any).stack } })
+      if (e instanceof Error) {
+        if (!e.stack) {
+          e.stack = new Error().stack
+        }
+        if (e.name === 'Error') {
+          Object.assign(e, {
+            name: 'LaunchGeneralError',
+          })
+        }
+      }
+      throw e
     }
   }
 
@@ -281,7 +294,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
         }
       } catch (e) {
         throw new LaunchException({
-          type: 'launchNoVersionInstalled',
+          type: LaunchExceptionType.NoVersionInstalled,
           options,
         })
       }
@@ -289,7 +302,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
       this.log(`Will launch with ${version.id} version.`)
 
       if (!javaPath) {
-        throw new LaunchException({ type: 'launchNoProperJava', javaPath: javaPath || '' }, 'Cannot launch without a valid java')
+        throw new LaunchException({ type: LaunchExceptionType.NoProperJava, javaPath: javaPath || '' }, 'Cannot launch without a valid java')
       }
 
       let process: ChildProcess
@@ -318,7 +331,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
           process = await this.#track(launch(op), 'spawn-minecraft-process', operationId)
         } catch (e) {
           if (isSystemError(e) && e.code === 'EPERM') {
-            throw new LaunchException({ type: 'launchJavaNoPermission', javaPath: op.javaPath }, 'Fail to spawn process')
+            throw new LaunchException({ type: LaunchExceptionType.JavaNoPermission, javaPath: op.javaPath }, 'Fail to spawn process')
           }
           throw e
         }
@@ -360,7 +373,7 @@ export class LaunchService extends AbstractService implements ILaunchService {
           this.error(err)
           throw err
         }
-        throw new LaunchException({ type: 'launchSpawnProcessFailed' })
+        throw new LaunchException({ type: LaunchExceptionType.SpawnProcessFailed })
       }
       const processData = {
         pid: process.pid,
@@ -453,7 +466,17 @@ export class LaunchService extends AbstractService implements ILaunchService {
       if (e instanceof LaunchException) {
         throw e
       }
-      throw new LaunchException({ type: 'launchGeneralException', error: { ...(e as any), message: (e as any).message, stack: (e as any).stack } }, (e as any).message, { cause: e })
+      if (e instanceof Error) {
+        if (!e.stack) {
+          e.stack = new Error().stack
+        }
+        if (e.name === 'Error') {
+          Object.assign(e, {
+            name: 'LaunchGeneralError',
+          })
+        }
+      }
+      throw e
     }
   }
 

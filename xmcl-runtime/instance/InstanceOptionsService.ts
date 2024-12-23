@@ -203,10 +203,6 @@ export class InstanceOptionsService extends AbstractService implements IInstance
 
   async editShaderOptions(options: EditShaderOptions): Promise<void> {
     const instancePath = options.instancePath
-    // const instance = this.instanceService.state.all[instancePath]
-    // if (!instance) {
-    //   throw new InstanceOptionException({ type: 'instanceNotFound', instancePath: options.instancePath! })
-    // }
     const current = await this.getShaderOptions(instancePath)
 
     current.shaderPack = options.shaderPack

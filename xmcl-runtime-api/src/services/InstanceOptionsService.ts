@@ -1,5 +1,4 @@
 import type { Frame as GameSetting } from '@xmcl/gamesetting'
-import { Exception, InstanceNotFoundException } from '../entities/exception'
 import { ShaderOptions } from '../entities/shaderpack'
 import { MutableState } from '../util/MutableState'
 import { ServiceKey } from './Service'
@@ -128,7 +127,3 @@ export interface InstanceOptionsService {
 }
 
 export const InstanceOptionsServiceKey: ServiceKey<InstanceOptionsService> = 'InstanceOptionsService'
-
-export type InstanceOptionExceptions = InstanceNotFoundException
-
-export class InstanceOptionException extends Exception<InstanceOptionExceptions> { }

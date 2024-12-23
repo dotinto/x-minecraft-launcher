@@ -109,7 +109,7 @@ export interface BaseService {
   isResourceDatabaseOpened(): Promise<boolean>
 }
 
-export type BaseServiceExceptions = {
+export type MigrationExceptions = {
   /**
    * Throw when dest is a file
    */
@@ -130,6 +130,6 @@ export type BaseServiceExceptions = {
   destination: string
 }
 
-export class BaseServiceException extends Exception<BaseServiceExceptions> { }
+export class MigrationException extends Exception<MigrationExceptions> { }
 
 export const BaseServiceKey: ServiceKey<BaseService> = 'BaseService'

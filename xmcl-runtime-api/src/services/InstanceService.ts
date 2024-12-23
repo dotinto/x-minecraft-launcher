@@ -136,6 +136,9 @@ export class InstanceState {
     if ('java' in settings) {
       inst.java = settings.java
     }
+    if ('env' in settings) {
+      inst.env = settings.env
+    }
 
     inst.url = settings.url ?? inst.url
     inst.icon = settings.icon ?? inst.icon
@@ -194,12 +197,6 @@ export interface InstanceService {
    */
   editInstance(options: EditInstanceOptions & { instancePath: string }): Promise<void>
   /**
-   * Add a directory as managed instance folder. It will try to load the instance.json.
-   * If it's a common folder, it will try to create instance from the directory data.
-   * @param path The path of the instance
-   */
-  addExternalInstance(path: string): Promise<boolean>
-  /**
    * Get or create a MANAGED instance via your unique id
    * @param id The unique id, can be any string, but it will convert to a string can be file name
    * @returns The instance path
@@ -210,21 +207,3 @@ export interface InstanceService {
 }
 
 export const InstanceServiceKey: ServiceKey<InstanceService> = 'InstanceService'
-
-export type InstanceExceptions = {
-  type: 'instanceNameDuplicated'
-  path: string
-  name: string
-} | {
-  type: 'instanceNameRequired'
-} | {
-  type: 'instanceNotFound'
-  path: string
-} | {
-  type: 'instancePathInvalid'
-  path: string
-  reason: string
-}
-
-export class InstanceException extends Exception<InstanceExceptions> {
-}

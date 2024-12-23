@@ -84,6 +84,34 @@
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
+
+    <v-list-item>
+      <v-list-item-content>
+        <v-list-item-title>
+          {{ t("instance.vmVar") }}
+        </v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
+        <v-btn
+          icon
+          @click="onAddEnvVar"
+        >
+          <v-icon>add</v-icon>
+        </v-btn>
+      </v-list-item-action>
+    </v-list-item>
+
+    <EnvVarTableItem
+      :env="env"
+      @delete="onEnvVarDeleted"
+    />
+
+    <EnvVarAddItem
+      v-if="adding"
+      @clear="onEnvVarCleared"
+      @add="onEnvVarAdded"
+    />
+
     <v-list-item>
       <v-list-item-content style="flex: 1">
         <v-list-item-title>
@@ -112,6 +140,8 @@ import SettingItemCheckbox from '@/components/SettingItemCheckbox.vue'
 import SettingHeader from '@/components/SettingHeader.vue'
 import { useEventListener } from '@vueuse/core'
 import { vSharedTooltip } from '@/directives/sharedTooltip'
+import EnvVarTableItem from '@/components/EnvVarTableItem.vue'
+import EnvVarAddItem from '@/components/EnvVarAddItem.vue'
 
 const { t } = useI18n()
 const {
@@ -126,6 +156,7 @@ const {
   globalDisableAuthlibInjector,
   globalDisableElyByAuthlib,
   globalPrependCommand,
+  globalEnv,
   setGlobalSettings,
 } = useGlobalSettings()
 
@@ -140,6 +171,7 @@ const hideLauncher = ref(globalHideLauncher.value)
 const showLog = ref(globalShowLog.value)
 const disableAuthlibInjector = ref(globalDisableAuthlibInjector.value)
 const disableElyByAuthlib = ref(globalDisableElyByAuthlib.value)
+const env = ref(globalEnv.value)
 
 onMounted(() => {
   assignMemory.value = globalAssignMemory.value
@@ -168,7 +200,24 @@ const save = () => {
     globalDisableAuthlibInjector: disableAuthlibInjector.value,
     globalDisableElyByAuthlib: disableElyByAuthlib.value,
     globalPrependCommand: prependCommand.value,
+    globalEnv: env.value,
   })
+}
+
+const adding = ref(false)
+function onAddEnvVar() {
+  adding.value = true
+}
+function onEnvVarCleared() {
+  adding.value = false
+}
+function onEnvVarAdded(key: string, value: string) {
+  adding.value = false
+  env.value = { ...env.value, [key]: value }
+}
+function onEnvVarDeleted(key: string) {
+  const { [key]: _, ...rest } = env.value
+  env.value = rest
 }
 
 useEventListener('beforeunload', save)
